@@ -202,28 +202,74 @@ export default function App() {
 
   const toggleFullscreen = async () => {
     playSound('click');
+    const docEl = document.documentElement as any;
+    const doc = document as any;
+
     try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
+      const isCurrentlyFullscreen = !!(
+        doc.fullscreenElement || 
+        doc.webkitFullscreenElement || 
+        doc.mozFullScreenElement || 
+        doc.msFullscreenElement ||
+        (isFullscreen && !doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement)
+      );
+
+      if (!isCurrentlyFullscreen) {
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) {
+          await docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) {
+          await docEl.msRequestFullscreen();
+        } else {
+          // No native support, fallback to virtual fullscreen
+          setIsFullscreen(true);
+          return;
+        }
         setIsFullscreen(true);
       } else {
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-          setIsFullscreen(false);
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) {
+          await doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) {
+          await doc.msExitFullscreen();
         }
+        setIsFullscreen(false);
       }
     } catch (err) {
-      console.error("Fullscreen error:", err);
+      console.warn("Fullscreen API failed, falling back to virtual fullscreen:", err);
+      // Fallback to virtual fullscreen on any error (e.g. permission or iframe constraints)
+      setIsFullscreen(!isFullscreen);
     }
   };
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const doc = document as any;
+      const isNativeFS = !!(
+        doc.fullscreenElement || 
+        doc.webkitFullscreenElement || 
+        doc.mozFullScreenElement || 
+        doc.msFullscreenElement
+      );
+      setIsFullscreen(isNativeFS);
     };
+
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, []);
 
@@ -447,7 +493,16 @@ export default function App() {
           key="main"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#F27D26] selection:text-black overflow-hidden relative"
+          className={`bg-[#050505] text-white font-sans selection:bg-[#F27D26] selection:text-black relative ${
+            isFullscreen && typeof document !== 'undefined' && !(
+              document.fullscreenElement || 
+              (document as any).webkitFullscreenElement || 
+              (document as any).mozFullScreenElement || 
+              (document as any).msFullscreenElement
+            )
+              ? 'fixed inset-0 z-[199] w-screen h-screen overflow-y-auto' 
+              : 'min-h-screen overflow-hidden'
+          }`}
         >
       {/* Notification Bar */}
       <AnimatePresence>
