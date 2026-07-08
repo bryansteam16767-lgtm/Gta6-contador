@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Globe, Bell, Volume2, VolumeX, Layout, Palette, Check } from 'lucide-react';
+import { X, Globe, Bell, Volume2, VolumeX, Layout, Palette, Check, Clock } from 'lucide-react';
 import { translations, Language } from '../translations';
 
 interface SettingsModalProps {
@@ -17,6 +17,9 @@ interface SettingsModalProps {
   theme: 'vice' | 'noir' | 'classic';
   setTheme: (theme: 'vice' | 'noir' | 'classic') => void;
   playSound: (type: any) => void;
+  releaseAlertsEnabled: boolean;
+  setReleaseAlertsEnabled: (enabled: boolean) => void;
+  onSimulateAlert: (type: '24h' | '1h') => void;
 }
 
 export default function SettingsModal({
@@ -32,7 +35,10 @@ export default function SettingsModal({
   setUiDensity,
   theme,
   setTheme,
-  playSound
+  playSound,
+  releaseAlertsEnabled,
+  setReleaseAlertsEnabled,
+  onSimulateAlert
 }: SettingsModalProps) {
   const t = translations[language].settings;
 
@@ -150,6 +156,68 @@ export default function SettingsModal({
                       <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${!isMuted ? 'left-6' : 'left-1'}`} />
                     </div>
                   </button>
+                </div>
+              </div>
+
+              {/* GTA 6 Release Alerts Section */}
+              <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
+                <div className="flex items-center gap-2 text-white/80">
+                  <Bell size={16} className="text-[#F27D26]" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#F27D26]">
+                    {t.releaseNotifications}
+                  </span>
+                </div>
+
+                <p className="text-[10px] text-white/50 leading-relaxed font-medium">
+                  {t.releaseNotificationsDesc}
+                </p>
+
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Toggle button */}
+                  <button
+                    onClick={() => {
+                      setReleaseAlertsEnabled(!releaseAlertsEnabled);
+                      playSound('click');
+                    }}
+                    className={`p-3.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
+                      releaseAlertsEnabled 
+                        ? 'bg-[#F27D26]/10 border-[#F27D26]/30 text-[#F27D26]' 
+                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="font-bold uppercase tracking-wider text-[11px]">
+                      {t.enableReleaseNotifications}
+                    </span>
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${releaseAlertsEnabled ? 'bg-[#F27D26]' : 'bg-white/20'}`}>
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${releaseAlertsEnabled ? 'left-6' : 'left-1'}`} />
+                    </div>
+                  </button>
+
+                  {/* Simulation/Test buttons */}
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSimulateAlert('24h');
+                        playSound('click');
+                      }}
+                      className="py-2.5 px-3 bg-white/5 hover:bg-[#F27D26]/10 border border-white/10 hover:border-[#F27D26]/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:text-[#F27D26] transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Clock size={12} />
+                      {t.test24hAlert}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSimulateAlert('1h');
+                        playSound('click');
+                      }}
+                      className="py-2.5 px-3 bg-white/5 hover:bg-purple-500/10 border border-white/10 hover:border-purple-500/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:text-purple-400 transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Clock size={12} />
+                      {t.test1hAlert}
+                    </button>
+                  </div>
                 </div>
               </div>
 

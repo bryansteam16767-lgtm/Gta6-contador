@@ -141,6 +141,19 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [releaseAlertsEnabled, setReleaseAlertsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('gta6_release_alerts_enabled') !== 'false';
+  });
+  const [activeReleaseAlert, setActiveReleaseAlert] = useState<'24h' | '1h' | null>(null);
+
+  const toggleReleaseAlerts = (enabled: boolean) => {
+    setReleaseAlertsEnabled(enabled);
+    localStorage.setItem('gta6_release_alerts_enabled', enabled ? 'true' : 'false');
+    if (enabled && 'Notification' in window) {
+      Notification.requestPermission();
+    }
+  };
+
   const toggleBookmark = (id: string) => {
     playSound('click');
     const updated = bookmarkedIntel.includes(id)
@@ -314,13 +327,52 @@ export default function App() {
       
       if (difference > 0) {
         const totalDays = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hoursPart = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const minutesPart = Math.floor((difference / 1000 / 60) % 60);
+        const secondsPart = Math.floor((difference / 1000) % 60);
+
         setTimeLeft({
           years: Math.floor(totalDays / 365),
           days: totalDays % 365,
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
+          hours: hoursPart,
+          minutes: minutesPart,
+          seconds: secondsPart,
         });
+
+        // Countdown release alerts check
+        if (releaseAlertsEnabled) {
+          const hoursLeft = totalDays * 24 + hoursPart;
+          
+          // 24 Hours Alert
+          if (hoursLeft <= 24 && hoursLeft > 1) {
+            if (!localStorage.getItem('gta6_alert_24h_shown')) {
+              localStorage.setItem('gta6_alert_24h_shown', 'true');
+              setActiveReleaseAlert('24h');
+              playSound('celebration', 0.5);
+              if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('GTA VI: 24 Hours Left!', {
+                  body: 'Only 24 hours left until the historic launch of Grand Theft Auto VI! Get ready to return to Vice City.',
+                  icon: '/favicon.ico'
+                });
+              }
+            }
+          }
+          
+          // 1 Hour Alert
+          if (hoursLeft <= 1 && hoursLeft >= 0) {
+            if (!localStorage.getItem('gta6_alert_1h_shown')) {
+              localStorage.setItem('gta6_alert_1h_shown', 'true');
+              setActiveReleaseAlert('1h');
+              playSound('hack', 0.5);
+              if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('GTA VI: THE FINAL HOUR!', {
+                  body: 'THE FINAL HOUR! Only 1 hour remains until Grand Theft Auto VI is unleashed! Start your engines.',
+                  icon: '/favicon.ico'
+                });
+              }
+            }
+          }
+        }
 
         // Update Hack Phase based on weeks remaining
         const weeksLeft = Math.floor(totalDays / 7);
@@ -1543,6 +1595,9 @@ export default function App() {
         theme={theme}
         setTheme={setTheme}
         playSound={playSound}
+        releaseAlertsEnabled={releaseAlertsEnabled}
+        setReleaseAlertsEnabled={toggleReleaseAlerts}
+        onSimulateAlert={(type) => setActiveReleaseAlert(type)}
       />
 
       {/* YouTube Trailer Modal */}
@@ -1555,6 +1610,96 @@ export default function App() {
 
       {/* Holiday Countdown */}
       <HolidayCountdown language={language} />
+
+      {/* Release Alert Pop-up */}
+      <AnimatePresence>
+        {activeReleaseAlert && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl"
+          >
+            {/* Ambient Background Glow matching the warning level */}
+            <div className={`absolute inset-0 opacity-15 pointer-events-none transition-all duration-500 bg-[radial-gradient(circle_at_center,${
+              activeReleaseAlert === '24h' ? '#F27D26' : '#FF00FF'
+            }_0%,transparent_70%)]`} />
+            
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              className={`bg-[#0a0a0a] border-2 p-8 md:p-12 rounded-3xl max-w-2xl w-full text-center relative overflow-hidden shadow-2xl ${
+                activeReleaseAlert === '24h' ? 'border-[#F27D26]/40 shadow-[#F27D26]/10' : 'border-pink-500/40 shadow-pink-500/10'
+              }`}
+            >
+              {/* Scanlines inside alert */}
+              <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px]" />
+              
+              {/* Pulsing Alert Icon */}
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 2, -2, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center border-2 mb-6 ${
+                  activeReleaseAlert === '24h' 
+                    ? 'bg-[#F27D26]/10 border-[#F27D26] text-[#F27D26]' 
+                    : 'bg-pink-500/10 border-pink-500 text-pink-500'
+                }`}
+              >
+                <Bell size={40} className="animate-pulse" />
+              </motion.div>
+
+              <h2 className={`text-3xl md:text-5xl font-black uppercase tracking-tighter italic mb-4 ${
+                activeReleaseAlert === '24h' ? 'text-[#F27D26]' : 'text-pink-500'
+              }`}>
+                {activeReleaseAlert === '24h' 
+                  ? (language === 'es' ? 'ALERTA DE 24 HORAS' : '24-HOUR COUNTDOWN ALERT')
+                  : (language === 'es' ? '¡LA HORA FINAL!' : 'THE FINAL HOUR ALERT')
+                }
+              </h2>
+
+              <p className="text-sm md:text-base text-zinc-300 font-semibold uppercase tracking-wider mb-8 leading-relaxed">
+                {activeReleaseAlert === '24h'
+                  ? (language === 'es' 
+                      ? '¡Solo quedan 24 horas para el lanzamiento histórico de Grand Theft Auto VI! Prepárate para regresar a Vice City.' 
+                      : 'Only 24 hours left until the historic launch of Grand Theft Auto VI! Get ready to return to Vice City.')
+                  : (language === 'es' 
+                      ? '¡Inicia tus motores! Queda exactamente 1 hora para que comience el caos en Vice City. El juego de la década está por llegar.' 
+                      : 'Start your engines! Exactly 1 hour remains until the chaos begins in Vice City. The game of the decade is about to unfold.')
+                }
+              </p>
+
+              {/* Real-time precise target info display */}
+              <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl mb-8 flex flex-col items-center justify-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                  {language === 'es' ? 'FECHA OBJETIVO DE LANZAMIENTO' : 'TARGET LAUNCH DATE'}
+                </span>
+                <span className="text-xl md:text-2xl font-black text-white tracking-widest uppercase italic">
+                  {language === 'es' ? '19 de Noviembre, 2026' : 'November 19, 2026'}
+                </span>
+                <span className="text-xs font-mono text-zinc-400 mt-2">
+                  {language === 'es' ? 'Localización: Global' : 'Deployment: Global'}
+                </span>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => {
+                    setActiveReleaseAlert(null);
+                    playSound('celebration', 0.3);
+                  }}
+                  className={`flex-1 py-4 px-6 font-black uppercase italic tracking-widest rounded-xl text-black hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer ${
+                    activeReleaseAlert === '24h' ? 'bg-[#F27D26]' : 'bg-pink-500'
+                  }`}
+                >
+                  {language === 'es' ? 'CONFIRMAR Y CERRAR' : 'ACKNOWLEDGE & DISMISS'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Decorative Elements */}
       <div className="fixed bottom-8 left-8 z-20 hidden lg:block">

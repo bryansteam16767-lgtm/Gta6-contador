@@ -151,7 +151,16 @@ export const translations = {
       viceCity: 'Vice City (Neon)',
       noir: 'Vice Noir (Dark)',
       classic: 'Classic (Retro)',
-      save: 'Save Changes'
+      save: 'Save Changes',
+      releaseNotifications: 'GTA 6 Release Alerts',
+      enableReleaseNotifications: 'Enable Countdown Alerts',
+      releaseNotificationsDesc: 'Notify 24 hours and 1 hour before the November 19, 2026 launch.',
+      test24hAlert: 'Simulate 24h Alert',
+      test1hAlert: 'Simulate 1h Alert',
+      browserPermission: 'Browser Permission',
+      requestPermission: 'Request Access',
+      permissionGranted: 'Granted',
+      permissionDenied: 'Blocked'
     },
     creatorLab: {
       title: 'Creator Lab',
@@ -587,7 +596,16 @@ export const translations = {
       viceCity: 'Vice City (Neón)',
       noir: 'Vice Noir (Oscuro)',
       classic: 'Clásico (Retro)',
-      save: 'Guardar Cambios'
+      save: 'Guardar Cambios',
+      releaseNotifications: 'Alertas de Lanzamiento GTA 6',
+      enableReleaseNotifications: 'Activar Alertas de Cuenta Regresiva',
+      releaseNotificationsDesc: 'Notificar 24 horas y 1 hora antes del lanzamiento el 19 de noviembre de 2026.',
+      test24hAlert: 'Simular Alerta 24h',
+      test1hAlert: 'Simular Alerta 1h',
+      browserPermission: 'Permiso del Navegador',
+      requestPermission: 'Solicitar Acceso',
+      permissionGranted: 'Concedido',
+      permissionDenied: 'Bloqueado'
     },
     creatorLab: {
       title: 'Laboratorio del Creador',
