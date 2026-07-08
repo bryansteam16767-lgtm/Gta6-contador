@@ -5,7 +5,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, MapPin, Share2, X, Settings, Check, Volume2, VolumeX, Twitter, Facebook, Link2, Palmtree, Star, Sparkles, User, LogIn, LogOut, Languages, Users, MessageCircle, Send, ExternalLink, Bell, Info, Globe, Lock, Crown, Radio, Tag, FileText, Bookmark } from 'lucide-react';
+import { Calendar, Clock, MapPin, Share2, X, Settings, Check, Volume2, VolumeX, Twitter, Facebook, Link2, Palmtree, Star, Sparkles, User, LogIn, LogOut, Languages, Users, MessageCircle, Send, ExternalLink, Bell, Info, Globe, Lock, Crown, Radio, Tag, FileText, Bookmark, Maximize2, Minimize2 } from 'lucide-react';
 import { auth, db } from './firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import CreatorLab from './components/CreatorLab';
@@ -145,6 +145,7 @@ export default function App() {
     return localStorage.getItem('gta6_release_alerts_enabled') !== 'false';
   });
   const [activeReleaseAlert, setActiveReleaseAlert] = useState<'24h' | '1h' | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const toggleReleaseAlerts = (enabled: boolean) => {
     setReleaseAlertsEnabled(enabled);
@@ -198,6 +199,33 @@ export default function App() {
     audio.volume = volume;
     audio.play().catch(() => {}); // Ignore autoplay blocks
   };
+
+  const toggleFullscreen = async () => {
+    playSound('click');
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+          setIsFullscreen(false);
+        }
+      }
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     // Load mock session from localStorage
@@ -1036,6 +1064,17 @@ export default function App() {
               className="p-3 border border-white/20 hover:border-[#4285F4] text-[#4285F4] bg-[#4285F4]/5 transition-colors duration-300 rounded-sm cursor-pointer flex items-center justify-center group"
             >
               <FileText size={20} className="group-hover:scale-110 transition-transform" />
+            </button>
+          </Tooltip>
+
+          <Tooltip content={t.tooltips.fullscreen} position="top">
+            <button 
+              onClick={toggleFullscreen}
+              onMouseEnter={() => playSound('hover', 0.05)}
+              className="p-3 border border-white/20 hover:border-white/60 transition-colors duration-300 rounded-sm cursor-pointer flex items-center justify-center text-white"
+              title={t.nav.fullscreen}
+            >
+              {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
             </button>
           </Tooltip>
 

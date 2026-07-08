@@ -73,7 +73,8 @@ export const translations = {
       settings: 'Settings',
       share: 'Share',
       premium: 'Premium',
-      radio: 'Radio'
+      radio: 'Radio',
+      fullscreen: 'Fullscreen'
     },
     radio: {
       title: 'Vice City Radio',
@@ -136,7 +137,8 @@ export const translations = {
       analytics: 'View real-time traffic and engagement metrics.',
       achievements: 'Track your progress and unlock visual rewards.',
       map: 'Explore rumors and intel across the Leonida map.',
-      build: 'Compile and render Vice City assets.'
+      build: 'Compile and render Vice City assets.',
+      fullscreen: 'Toggle cinematic fullscreen mode for an immersive experience.'
     },
     settings: {
       title: 'Settings',
@@ -518,7 +520,8 @@ export const translations = {
       settings: 'Ajustes',
       share: 'Compartir',
       premium: 'Premium',
-      radio: 'Radio'
+      radio: 'Radio',
+      fullscreen: 'Pantalla Completa'
     },
     radio: {
       title: 'Radio Vice City',
@@ -581,7 +584,8 @@ export const translations = {
       analytics: 'Ver métricas de tráfico y compromiso en tiempo real.',
       achievements: 'Rastrea tu progreso y desbloquea recompensas visuales.',
       map: 'Explora rumores e información en el mapa de Leonida.',
-      build: 'Compila y renderiza activos de Vice City.'
+      build: 'Compila y renderiza activos de Vice City.',
+      fullscreen: 'Activa o desactiva el modo de pantalla completa para una experiencia cinematográfica.'
     },
     settings: {
       title: 'Ajustes',
