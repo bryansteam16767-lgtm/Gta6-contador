@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user information and roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User's display name" },
+        "email": { "type": "string", "format": "email", "description": "User's email" },
+        "photoURL": { "type": "string", "description": "User's avatar URL" },
+        "role": { "type": "string", "enum": ["creator", "member", "moderator"], "description": "User's role in the system" },
+        "lastLogin": { "type": "string", "format": "date-time", "description": "Last login timestamp" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A message sent in the live chat.",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "Message content" },
+        "authorUid": { "type": "string", "description": "UID of the message author" },
+        "authorName": { "type": "string", "description": "Name of the message author" },
+        "authorAvatar": { "type": "string", "description": "Avatar of the message author" },
+        "authorRole": { "type": "string", "description": "Role of the message author" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the message was sent" }
+      },
+      "required": ["text", "authorUid", "timestamp"]
+    },
+    "TwitchStatus": {
+      "title": "Twitch Status",
+      "description": "Global status of the Twitch stream.",
+      "type": "object",
+      "properties": {
+        "isLive": { "type": "boolean", "description": "Whether the creator is live" },
+        "updatedBy": { "type": "string", "description": "UID of the creator who updated the status" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When the status was updated" }
+      },
+      "required": ["isLive", "updatedAt"]
+    },
+    "CommunityUpload": {
+      "title": "Community Upload",
+      "description": "Metadata for a community content upload.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID for the upload" },
+        "name": { "type": "string", "description": "File name" },
+        "type": { "type": "string", "description": "MIME type" },
+        "size": { "type": "string", "description": "Formatted file size" },
+        "date": { "type": "string", "description": "Upload date string" },
+        "user": { "type": "string", "description": "Uploader display name" },
+        "userId": { "type": "string", "description": "Uploader UID" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["id", "name", "userId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and roles."
+    },
+    "/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Global live chat messages."
+    },
+    "/status/twitch": {
+      "schema": "TwitchStatus",
+      "description": "Global Twitch live status."
+    },
+    "/uploads/{uploadId}": {
+      "schema": "CommunityUpload",
+      "description": "Community content uploads in the Social Vault."
+    }
+  }
+}

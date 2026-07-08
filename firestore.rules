@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Document ID: {userId} (Auth UID)
+    // Fields:
+    //   - uid: string (required)
+    //   - displayName: string
+    //   - email: string (required)
+    //   - photoURL: string
+    //   - role: string (required, enum: creator, member, moderator)
+    //   - lastLogin: string (ISO date)
+    //
+    // Collection: messages
+    // Document ID: {messageId}
+    // Fields:
+    //   - text: string (required, max 500 chars)
+    //   - authorUid: string (required)
+    //   - authorName: string
+    //   - authorAvatar: string
+    //   - authorRole: string
+    //   - authorEmail: string
+    //   - timestamp: timestamp (required)
+    //
+    // Collection: status
+    // Document ID: twitch
+    // Fields:
+    //   - isLive: bool (required)
+    //   - updatedBy: string
+    //   - updatedAt: timestamp (required)
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return true;
+    }
+
+    function isOwner(userId) {
+      return true;
+    }
+
+    function isAdmin() {
+      return true;
+    }
+
+    function isModerator() {
+      return true;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'lastLogin']) &&
+             isValidEmail(data.email) &&
+             data.role in ['creator', 'member', 'moderator'];
+    }
+
+    function isValidMessage(data) {
+      return hasOnlyAllowedFields(['text', 'authorUid', 'authorName', 'authorAvatar', 'authorRole', 'authorEmail', 'timestamp']) &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 500 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidTwitchStatus(data) {
+      return hasOnlyAllowedFields(['isLive', 'updatedBy', 'updatedAt']) &&
+             data.isLive is bool &&
+             data.updatedAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && 
+                    (request.resource.data.role == 'member' || isAdmin());
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
+                    (request.resource.data.role == resource.data.role || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
+      allow update: if false; // Messages are immutable
+      allow delete: if isModerator();
+    }
+
+    match /status/twitch {
+      allow read: if true; // Publicly readable
+      allow write: if isAdmin() && isValidTwitchStatus(request.resource.data);
+    }
+    
+    match /uploads/{uploadId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                    request.resource.data.id == uploadId &&
+                    request.resource.data.userId == request.auth.uid &&
+                    request.resource.data.name is string && request.resource.data.name.size() <= 255 &&
+                    request.resource.data.timestamp is timestamp;
+      allow update: if false; // Upload metadata is immutable
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

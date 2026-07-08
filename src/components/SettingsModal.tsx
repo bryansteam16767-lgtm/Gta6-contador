@@ -1,0 +1,231 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Globe, Bell, Volume2, VolumeX, Layout, Palette, Check } from 'lucide-react';
+import { translations, Language } from '../translations';
+
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  isMuted: boolean;
+  setIsMuted: (muted: boolean) => void;
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: (enabled: boolean) => void;
+  uiDensity: 'compact' | 'standard';
+  setUiDensity: (density: 'compact' | 'standard') => void;
+  theme: 'vice' | 'noir' | 'classic';
+  setTheme: (theme: 'vice' | 'noir' | 'classic') => void;
+  playSound: (type: any) => void;
+}
+
+export default function SettingsModal({
+  isOpen,
+  onClose,
+  language,
+  setLanguage,
+  isMuted,
+  setIsMuted,
+  notificationsEnabled,
+  setNotificationsEnabled,
+  uiDensity,
+  setUiDensity,
+  theme,
+  setTheme,
+  playSound
+}: SettingsModalProps) {
+  const t = translations[language].settings;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="bg-[#111] border border-white/10 p-8 rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Background Glow */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#F27D26] to-transparent opacity-50" />
+            
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-2xl font-black uppercase italic tracking-wider text-white">
+                  {t.title}
+                </h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#F27D26] opacity-80">
+                  System Configuration v1.0.6
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  onClose();
+                  playSound('close');
+                }} 
+                className="p-2 hover:bg-white/10 rounded-full transition-colors opacity-50 hover:opacity-100"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+              {/* Language */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-white/60">
+                  <Globe size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t.language}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {(['en', 'es'] as Language[]).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => {
+                        setLanguage(lang);
+                        playSound('click');
+                      }}
+                      className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                        language === lang 
+                          ? 'bg-[#F27D26]/10 border-[#F27D26] text-[#F27D26]' 
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                      }`}
+                    >
+                      <span className="font-bold uppercase tracking-wider">{lang === 'en' ? 'English' : 'Español'}</span>
+                      {language === lang && <Check size={16} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notifications & Sound */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-white/60">
+                    <Bell size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{t.notifications}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setNotificationsEnabled(!notificationsEnabled);
+                      playSound('click');
+                    }}
+                    className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                      notificationsEnabled 
+                        ? 'bg-green-500/10 border-green-500/50 text-green-500' 
+                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="font-bold uppercase tracking-wider text-xs">{t.enableNotifications}</span>
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${notificationsEnabled ? 'bg-green-500' : 'bg-white/20'}`}>
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${notificationsEnabled ? 'left-6' : 'left-1'}`} />
+                    </div>
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-white/60">
+                    {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                    <span className="text-[10px] font-black uppercase tracking-widest">{t.soundEffects}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMuted(!isMuted);
+                      playSound('click');
+                    }}
+                    className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                      !isMuted 
+                        ? 'bg-[#F27D26]/10 border-[#F27D26]/50 text-[#F27D26]' 
+                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="font-bold uppercase tracking-wider text-xs">{!isMuted ? 'Enabled' : 'Disabled'}</span>
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${!isMuted ? 'bg-[#F27D26]' : 'bg-white/20'}`}>
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${!isMuted ? 'left-6' : 'left-1'}`} />
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* UI Density */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-white/60">
+                  <Layout size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t.uiDensity}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {(['standard', 'compact'] as const).map((density) => (
+                    <button
+                      key={density}
+                      onClick={() => {
+                        setUiDensity(density);
+                        playSound('click');
+                      }}
+                      className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                        uiDensity === density 
+                          ? 'bg-[#F27D26]/10 border-[#F27D26] text-[#F27D26]' 
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                      }`}
+                    >
+                      <span className="font-bold uppercase tracking-wider">{t[density]}</span>
+                      {uiDensity === density && <Check size={16} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Theme */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-white/60">
+                  <Palette size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t.theme}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {(['vice', 'noir', 'classic'] as const).map((tName) => (
+                    <button
+                      key={tName}
+                      onClick={() => {
+                        setTheme(tName);
+                        playSound('click');
+                      }}
+                      className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2 text-center ${
+                        theme === tName 
+                          ? 'bg-[#F27D26]/10 border-[#F27D26] text-[#F27D26]' 
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className={`w-full h-8 rounded-lg mb-1 ${
+                        tName === 'vice' ? 'bg-gradient-to-br from-[#F27D26] to-[#FF00FF]' :
+                        tName === 'noir' ? 'bg-zinc-900' :
+                        'bg-blue-900'
+                      }`} />
+                      <span className="text-[8px] font-black uppercase tracking-widest leading-tight">
+                        {tName === 'vice' ? t.viceCity : tName === 'noir' ? t.noir : t.classic}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                onClose();
+                playSound('celebration');
+              }}
+              className="w-full mt-8 py-4 bg-[#F27D26] text-white font-black uppercase italic tracking-widest rounded-2xl hover:bg-[#ff8c37] transition-all shadow-lg shadow-[#F27D26]/20 active:scale-[0.98]"
+            >
+              {t.save}
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
