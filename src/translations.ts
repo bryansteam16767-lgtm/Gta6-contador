@@ -74,7 +74,9 @@ export const translations = {
       share: 'Share',
       premium: 'Premium',
       radio: 'Radio',
-      fullscreen: 'Fullscreen'
+      fullscreen: 'Fullscreen',
+      mapExplorer: 'Map Explorer',
+      weather: 'Vice Weather'
     },
     radio: {
       title: 'Vice City Radio',
@@ -118,6 +120,8 @@ export const translations = {
       creatorLab: 'Access AI-powered tools to generate characters, missions, and more.',
       radio: 'Listen to curated Vice City radio stations while you wait.',
       gta5Price: 'Check the current price of GTA V across different platforms.',
+      mapExplorer: 'Explore iconic Vice City locations and uncover AI-generated lore.',
+      weather: 'View live dynamic weather radar and atmospheric updates across Leonida.',
       settings: 'Customize the countdown and application settings.',
       hackMode: 'Toggle Vice City Hack Mode for a retro aesthetic.',
       mute: 'Mute or unmute background music and sound effects.',
@@ -162,7 +166,17 @@ export const translations = {
       browserPermission: 'Browser Permission',
       requestPermission: 'Request Access',
       permissionGranted: 'Granted',
-      permissionDenied: 'Blocked'
+      permissionDenied: 'Blocked',
+      trailerSection: 'Trailer Customization',
+      trailerDesc: 'Customize the YouTube Video ID or URL played by the trailer button.',
+      trailerPlaceholder: 'Enter YouTube Video ID or full URL...',
+      trailerPresetLabel: 'Presets',
+      trailerCustomLabel: 'Custom Video',
+      trailerPreset1: 'GTA VI Official Trailer 1',
+      trailerPreset2: 'Vice City Fan Soundtrack',
+      trailerPreset3: 'GTA VI Cinematic Hype',
+      bgVideoLabel: 'Background Video',
+      bgVideoDesc: 'Play the trailer video as an animated background behind the countdown.'
     },
     creatorLab: {
       title: 'Creator Lab',
@@ -445,6 +459,40 @@ export const translations = {
         portGellhorn: 'Port Gellhorn',
         keys: 'The Keys'
       }
+    },
+    mapExplorer: {
+      title: 'Leonida Map Explorer',
+      subtitle: 'SATELLITE INTEL SYSTEM',
+      locTypeAll: 'All Locations',
+      locTypeBeaches: 'Beaches & Coasts',
+      locTypeUrban: 'Urban & Districts',
+      locTypeIndustrial: 'Industrial & Ports',
+      locTypeNature: 'Swamps & Nature',
+      locTypeLuxury: 'Luxury & Estates',
+      coordinates: 'COORDINATES',
+      decryptIntel: 'DECRYPT SATELLITE INTEL',
+      rescanIntel: 'RE-SCAN SECTOR',
+      loading: 'DECRYPTING SATELLITE RADAR DATA...',
+      defaultLore: 'Select any sector on the tactical radar grid to decrypt local lore, rumored underworld activity, and leaked intelligence from the streets of Vice City.',
+      error: 'Connection timed out. Satellite encryption signal lost.',
+      sector: 'SECTOR'
+    },
+    weatherWidget: {
+      title: 'Vice City Weather Radar',
+      subtitle: 'LEONIDA METEOROLOGICAL NETWORK',
+      zoneLabel: 'Leonida Zones',
+      refreshRadar: 'REFRESH RADAR',
+      simulateStorm: 'SIMULATE TROPICAL SHIFT',
+      tempScale: 'UNIT',
+      humidity: 'HUMIDITY',
+      wind: 'WIND SPEED',
+      uvIndex: 'UV INDEX',
+      airQuality: 'AIR QUALITY',
+      advisory: 'METEO ADVISORY',
+      loreTip: 'FIELD CONDITIONS',
+      forecastTitle: '5-DAY ATMOSPHERIC FORECAST',
+      lastUpdated: 'RADAR SYNC',
+      liveRadarStatus: 'LIVE METEO RADAR'
     }
   },
   es: {
@@ -521,7 +569,9 @@ export const translations = {
       share: 'Compartir',
       premium: 'Premium',
       radio: 'Radio',
-      fullscreen: 'Pantalla Completa'
+      fullscreen: 'Pantalla Completa',
+      mapExplorer: 'Explorador del Mapa',
+      weather: 'Clima Vice'
     },
     radio: {
       title: 'Radio Vice City',
@@ -565,6 +615,8 @@ export const translations = {
       creatorLab: 'Accede a herramientas de IA para generar personajes, misiones y más.',
       radio: 'Escucha estaciones de radio seleccionadas de Vice City mientras esperas.',
       gta5Price: 'Consulta el precio actual de GTA V en diferentes plataformas.',
+      mapExplorer: 'Explora ubicaciones icónicas de Vice City y descubre historias generadas por IA.',
+      weather: 'Consulta el radar meteorológico en vivo y las condiciones atmosféricas de Leonida.',
       settings: 'Personaliza la cuenta regresiva y los ajustes de la aplicación.',
       hackMode: 'Activa el modo Hack de Vice City para una estética retro.',
       mute: 'Silencia o activa la música de fondo y los efectos de sonido.',
@@ -609,7 +661,17 @@ export const translations = {
       browserPermission: 'Permiso del Navegador',
       requestPermission: 'Solicitar Acceso',
       permissionGranted: 'Concedido',
-      permissionDenied: 'Bloqueado'
+      permissionDenied: 'Bloqueado',
+      trailerSection: 'Personalización de Tráiler',
+      trailerDesc: 'Personaliza el ID o enlace de YouTube que se reproduce al pulsar el botón del tráiler.',
+      trailerPlaceholder: 'Introduce el ID o enlace completo de YouTube...',
+      trailerPresetLabel: 'Preajustes',
+      trailerCustomLabel: 'Video Personalizado',
+      trailerPreset1: 'Tráiler Oficial 1 de GTA VI',
+      trailerPreset2: 'Banda Sonora Vice City',
+      trailerPreset3: 'Hype Cinemático de GTA VI',
+      bgVideoLabel: 'Video de Fondo',
+      bgVideoDesc: 'Reproduce el video del tráiler como un fondo animado detrás del contador.'
     },
     creatorLab: {
       title: 'Laboratorio del Creador',
@@ -892,6 +954,40 @@ export const translations = {
         portGellhorn: 'Port Gellhorn',
         keys: 'Los Cayos'
       }
+    },
+    mapExplorer: {
+      title: 'Explorador del Mapa Leonida',
+      subtitle: 'SISTEMA DE INTELIGENCIA SATELITAL',
+      locTypeAll: 'Todas las Zonas',
+      locTypeBeaches: 'Playas y Costas',
+      locTypeUrban: 'Zonas Urbanas',
+      locTypeIndustrial: 'Puertos e Industrias',
+      locTypeNature: 'Pantanos y Naturaleza',
+      locTypeLuxury: 'Lujo y Mansiones',
+      coordinates: 'COORDENADAS',
+      decryptIntel: 'DECODIFICAR INTELIGENCIA SATELITAL',
+      rescanIntel: 'ESCANEAR SECTOR DE NUEVO',
+      loading: 'DECODIFICANDO DATOS DEL RADAR SATELITAL...',
+      defaultLore: 'Selecciona cualquier sector en la cuadrícula táctica del radar para decodificar historias locales, actividad criminal rumoreada e inteligencia filtrada de las calles de Vice City.',
+      error: 'Tiempo de espera agotado. Se perdió la señal de encriptación satelital.',
+      sector: 'SECTOR'
+    },
+    weatherWidget: {
+      title: 'Radar Meteorológico de Vice City',
+      subtitle: 'RED METEOROLÓGICA DE LEONIDA',
+      zoneLabel: 'Zonas de Leonida',
+      refreshRadar: 'ACTUALIZAR RADAR',
+      simulateStorm: 'SIMULAR CAMBIO TROPICAL',
+      tempScale: 'UNIDAD',
+      humidity: 'HUMEDAD',
+      wind: 'VELOCIDAD DEL VIENTO',
+      uvIndex: 'ÍNDICE UV',
+      airQuality: 'CALIDAD DEL AIRE',
+      advisory: 'AVISO METEOROLÓGICO',
+      loreTip: 'CONDICIONES DE CAMPO',
+      forecastTitle: 'PRONÓSTICO ATMOSFÉRICO DE 5 DÍAS',
+      lastUpdated: 'SINCRONIZACIÓN RADAR',
+      liveRadarStatus: 'RADAR METEO EN VIVO'
     }
   }
 };

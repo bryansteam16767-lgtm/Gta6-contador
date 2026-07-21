@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Globe, Bell, Volume2, VolumeX, Layout, Palette, Check, Clock } from 'lucide-react';
+import { X, Globe, Bell, Volume2, VolumeX, Layout, Palette, Check, Clock, Play } from 'lucide-react';
 import { translations, Language } from '../translations';
 
 interface SettingsModalProps {
@@ -20,6 +20,10 @@ interface SettingsModalProps {
   releaseAlertsEnabled: boolean;
   setReleaseAlertsEnabled: (enabled: boolean) => void;
   onSimulateAlert: (type: '24h' | '1h') => void;
+  trailerVideoId: string;
+  setTrailerVideoId: (id: string) => void;
+  bgVideoEnabled: boolean;
+  setBgVideoEnabled: (enabled: boolean) => void;
 }
 
 export default function SettingsModal({
@@ -38,7 +42,11 @@ export default function SettingsModal({
   playSound,
   releaseAlertsEnabled,
   setReleaseAlertsEnabled,
-  onSimulateAlert
+  onSimulateAlert,
+  trailerVideoId,
+  setTrailerVideoId,
+  bgVideoEnabled,
+  setBgVideoEnabled
 }: SettingsModalProps) {
   const t = translations[language].settings;
 
@@ -216,6 +224,128 @@ export default function SettingsModal({
                     >
                       <Clock size={12} />
                       {t.test1hAlert}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trailer Customization Section */}
+              <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
+                <div className="flex items-center gap-2 text-white/80">
+                  <Play size={16} className="text-[#F27D26]" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#F27D26]">
+                    {t.trailerSection}
+                  </span>
+                </div>
+
+                <p className="text-[10px] text-white/50 leading-relaxed font-medium">
+                  {t.trailerDesc}
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-white/40">
+                      {t.trailerCustomLabel}
+                    </label>
+                    <input
+                      type="text"
+                      value={trailerVideoId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        let finalId = val.trim();
+                        if (finalId.includes('watch?v=')) {
+                          finalId = finalId.split('watch?v=')[1]?.split('&')[0] || finalId;
+                        } else if (finalId.includes('youtu.be/')) {
+                          finalId = finalId.split('youtu.be/')[1]?.split('?')[0] || finalId;
+                        } else if (finalId.includes('youtube.com/embed/')) {
+                          finalId = finalId.split('youtube.com/embed/')[1]?.split('?')[0] || finalId;
+                        }
+                        setTrailerVideoId(finalId);
+                      }}
+                      placeholder={t.trailerPlaceholder}
+                      className="w-full bg-white/5 border border-white/10 focus:border-[#F27D26]/60 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder-white/30 focus:outline-none transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-white/40">
+                      {t.trailerPresetLabel}
+                    </label>
+                    <div className="grid grid-cols-1 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTrailerVideoId('VQRLujxTm3c');
+                          playSound('click');
+                        }}
+                        className={`py-2 px-3 border rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all text-left flex items-center justify-between cursor-pointer ${
+                          trailerVideoId === 'VQRLujxTm3c'
+                            ? 'bg-[#F27D26]/10 border-[#F27D26]/40 text-[#F27D26]'
+                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                        }`}
+                      >
+                        <span>{t.trailerPreset1}</span>
+                        <span className="text-[8px] font-mono opacity-40">VQRLujxTm3c</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTrailerVideoId('_5-rD7p_wQ8');
+                          playSound('click');
+                        }}
+                        className={`py-2 px-3 border rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all text-left flex items-center justify-between cursor-pointer ${
+                          trailerVideoId === '_5-rD7p_wQ8'
+                            ? 'bg-[#F27D26]/10 border-[#F27D26]/40 text-[#F27D26]'
+                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                        }`}
+                      >
+                        <span>{t.trailerPreset2}</span>
+                        <span className="text-[8px] font-mono opacity-40">_5-rD7p_wQ8</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTrailerVideoId('63_vL-PbyQc');
+                          playSound('click');
+                        }}
+                        className={`py-2 px-3 border rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all text-left flex items-center justify-between cursor-pointer ${
+                          trailerVideoId === '63_vL-PbyQc'
+                            ? 'bg-[#F27D26]/10 border-[#F27D26]/40 text-[#F27D26]'
+                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                        }`}
+                      >
+                        <span>{t.trailerPreset3}</span>
+                        <span className="text-[8px] font-mono opacity-40">63_vL-PbyQc</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/5 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBgVideoEnabled(!bgVideoEnabled);
+                        playSound('click');
+                      }}
+                      className={`w-full p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
+                        bgVideoEnabled 
+                          ? 'bg-[#F27D26]/10 border-[#F27D26]/30 text-[#F27D26]' 
+                          : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="flex flex-col items-start gap-0.5 text-left max-w-[80%]">
+                        <span className="font-bold uppercase tracking-wider text-[11px]">
+                          {t.bgVideoLabel}
+                        </span>
+                        <span className="text-[9px] text-white/40 font-medium leading-tight">
+                          {t.bgVideoDesc}
+                        </span>
+                      </div>
+                      <div className={`w-10 h-5 rounded-full relative transition-colors shrink-0 ${bgVideoEnabled ? 'bg-[#F27D26]' : 'bg-white/20'}`}>
+                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${bgVideoEnabled ? 'left-6' : 'left-1'}`} />
+                      </div>
                     </button>
                   </div>
                 </div>

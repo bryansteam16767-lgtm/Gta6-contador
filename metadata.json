@@ -1,5 +1,6 @@
 {
   "name": "GTA6",
   "description": "A cinematic countdown timer for Grand Theft Auto 6, featuring a Creator Lab for AI-powered image and video generation inspired by Vice City.",
-  "requestFramePermissions": ["camera", "microphone", "geolocation"]
+  "requestFramePermissions": ["camera", "microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

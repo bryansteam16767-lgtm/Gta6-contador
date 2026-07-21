@@ -5,7 +5,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, MapPin, Share2, X, Settings, Check, Volume2, VolumeX, Twitter, Facebook, Link2, Palmtree, Star, Sparkles, User, LogIn, LogOut, Languages, Users, MessageCircle, Send, ExternalLink, Bell, Info, Globe, Lock, Crown, Radio, Tag, FileText, Bookmark, Maximize2, Minimize2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, Share2, X, Settings, Check, Volume2, VolumeX, Twitter, Facebook, Link2, Palmtree, Star, Sparkles, User, LogIn, LogOut, Languages, Users, MessageCircle, Send, ExternalLink, Bell, Info, Globe, Lock, Crown, Radio, Tag, FileText, Bookmark, Maximize2, Minimize2, Compass, Map, CloudSun } from 'lucide-react';
 import { auth, db } from './firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import CreatorLab from './components/CreatorLab';
@@ -19,6 +19,9 @@ import SupportButton from './components/SupportButton';
 import SettingsModal from './components/SettingsModal';
 import HolidayCountdown from './components/HolidayCountdown';
 import GoogleDocsModal from './components/GoogleDocsModal';
+import MapExplorerModal from './components/MapExplorerModal';
+import ViceCityWeatherModal from './components/ViceCityWeatherModal';
+import ViceCityWeatherBar from './components/ViceCityWeatherBar';
 import { translations, Language } from './translations';
 
 const TARGET_DATE = new Date('2026-11-19T00:00:00');
@@ -131,6 +134,8 @@ export default function App() {
   const [isRadioOpen, setIsRadioOpen] = useState(false);
   const [isTwitchLive, setIsTwitchLive] = useState(false);
   const [isGTA5PriceOpen, setIsGTA5PriceOpen] = useState(false);
+  const [isMapExplorerOpen, setIsMapExplorerOpen] = useState(false);
+  const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [isHackMode, setIsHackMode] = useState(false);
   const [hackPhase, setHackPhase] = useState(1);
   const [progress, setProgress] = useState(0);
@@ -146,6 +151,22 @@ export default function App() {
   });
   const [activeReleaseAlert, setActiveReleaseAlert] = useState<'24h' | '1h' | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [trailerVideoId, setTrailerVideoId] = useState<string>(() => {
+    return localStorage.getItem('gta6_trailer_video_id') || 'VQRLujxTm3c';
+  });
+  const [bgVideoEnabled, setBgVideoEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('gta6_bg_video_enabled') !== 'false';
+  });
+
+  const handleSetTrailerVideoId = (id: string) => {
+    setTrailerVideoId(id);
+    localStorage.setItem('gta6_trailer_video_id', id);
+  };
+
+  const handleSetBgVideoEnabled = (enabled: boolean) => {
+    setBgVideoEnabled(enabled);
+    localStorage.setItem('gta6_bg_video_enabled', enabled ? 'true' : 'false');
+  };
 
   const toggleReleaseAlerts = (enabled: boolean) => {
     setReleaseAlertsEnabled(enabled);
@@ -576,6 +597,19 @@ export default function App() {
       </AnimatePresence>
       {/* Cinematic Background Layer */}
       <div className={`absolute inset-0 z-0 overflow-hidden transition-colors duration-1000 ${isHackMode ? 'bg-[#1a0b1a]' : 'bg-[#050505]'}`}>
+        {/* Background YouTube Video */}
+        {bgVideoEnabled && trailerVideoId && (
+          <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden opacity-30">
+            <iframe
+              src={`https://www.youtube.com/embed/${trailerVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerVideoId}&playsinline=1&enablejsapi=1&showinfo=0&rel=0&iv_load_policy=3&fs=0&disablekb=1`}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] pointer-events-none select-none scale-110"
+              style={{ minWidth: '100%', minHeight: '100%', aspectRatio: '16/9' }}
+              allow="autoplay; encrypted-media"
+              title="GTA 6 Background Trailer"
+            />
+          </div>
+        )}
+
         {/* Parallax Image */}
         <motion.div 
           animate={{ 
@@ -599,7 +633,7 @@ export default function App() {
             }}
             src="https://picsum.photos/seed/gta-vi-ultra-realistic/1920/1080"
             alt="Realistic Vice City"
-            className={`w-full h-full object-cover ${isHackMode ? 'opacity-30' : 'opacity-50'}`}
+            className={`w-full h-full object-cover ${isHackMode ? 'opacity-30' : bgVideoEnabled ? 'opacity-20' : 'opacity-50'}`}
             referrerPolicy="no-referrer"
           />
         </motion.div>
@@ -692,9 +726,17 @@ export default function App() {
             GTA <span className="text-transparent bg-clip-text bg-gradient-to-b from-[#F27D26] to-[#D15D14]">6</span>
           </h1>
           
-          <p className="mt-4 text-sm md:text-base font-medium tracking-[0.3em] uppercase opacity-50">
-            {t.home.location}
-          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <p className="text-sm md:text-base font-medium tracking-[0.3em] uppercase opacity-50">
+              {t.home.location}
+            </p>
+            
+            <ViceCityWeatherBar 
+              onOpenModal={() => setIsWeatherModalOpen(true)}
+              playSound={playSound}
+              language={language}
+            />
+          </div>
           
           {userCountry && (
             <motion.div 
@@ -1109,6 +1151,42 @@ export default function App() {
             </button>
           </Tooltip>
 
+          {/* Map Explorer Button */}
+          <Tooltip content={t.tooltips.mapExplorer} position="top">
+            <button 
+              onClick={() => {
+                setIsMapExplorerOpen(true);
+                playSound('open');
+              }}
+              onMouseEnter={() => playSound('hover', 0.05)}
+              className="p-3 border border-white/10 bg-white/5 text-white hover:bg-[#F27D26]/20 hover:border-[#F27D26]/40 hover:text-[#F27D26] transition-all duration-300 rounded-sm cursor-pointer group flex items-center gap-2"
+              title={t.nav.mapExplorer}
+            >
+              <Compass size={20} className="group-hover:rotate-45 transition-transform duration-300" />
+              <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:block">
+                {t.nav.mapExplorer}
+              </span>
+            </button>
+          </Tooltip>
+
+          {/* Vice Weather Button */}
+          <Tooltip content={t.tooltips.weather} position="top">
+            <button 
+              onClick={() => {
+                setIsWeatherModalOpen(true);
+                playSound('open');
+              }}
+              onMouseEnter={() => playSound('hover', 0.05)}
+              className="p-3 border border-white/10 bg-white/5 text-white hover:bg-amber-500/20 hover:border-amber-500/40 hover:text-amber-400 transition-all duration-300 rounded-sm cursor-pointer group flex items-center gap-2"
+              title={t.nav.weather}
+            >
+              <CloudSun size={20} className="group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:block">
+                {t.nav.weather}
+              </span>
+            </button>
+          </Tooltip>
+
           <Tooltip content={t.tooltips.googleDocs} position="top">
             <button 
               onClick={() => {
@@ -1374,6 +1452,22 @@ export default function App() {
         onSubscribe={handleSubscribe}
         currentPlan={subscriptionPlan}
         playSound={playSound}
+      />
+
+      <MapExplorerModal
+        isOpen={isMapExplorerOpen}
+        onClose={() => setIsMapExplorerOpen(false)}
+        language={language}
+        playSound={playSound}
+        theme={theme}
+      />
+
+      <ViceCityWeatherModal
+        isOpen={isWeatherModalOpen}
+        onClose={() => setIsWeatherModalOpen(false)}
+        language={language}
+        playSound={playSound}
+        theme={theme}
       />
 
       {/* Share Modal */}
@@ -1692,13 +1786,17 @@ export default function App() {
         releaseAlertsEnabled={releaseAlertsEnabled}
         setReleaseAlertsEnabled={toggleReleaseAlerts}
         onSimulateAlert={(type) => setActiveReleaseAlert(type)}
+        trailerVideoId={trailerVideoId}
+        setTrailerVideoId={handleSetTrailerVideoId}
+        bgVideoEnabled={bgVideoEnabled}
+        setBgVideoEnabled={handleSetBgVideoEnabled}
       />
 
       {/* YouTube Trailer Modal */}
       <YouTubeTrailer 
         isOpen={isYouTubeOpen}
         onClose={() => setIsYouTubeOpen(false)}
-        videoId="VQRLujxTm3c"
+        videoId={trailerVideoId}
         playSound={playSound}
       />
 

@@ -5,9 +5,30 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import rateLimit from "express-rate-limit";
+import { GoogleGenAI } from "@google/genai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Lazy initialization for Gemini client to prevent server startup failure if GEMINI_API_KEY is missing
+let aiClient: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is required");
+    }
+    aiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
 
 async function startServer() {
   const app = express();
@@ -389,6 +410,198 @@ async function startServer() {
 
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // AI-generated Lore/Rumor blurb for Map Explorer
+  app.post("/api/map/lore", async (req, res) => {
+    const { locationId, locationName, promptGuide, language } = req.body;
+    if (!locationName || !promptGuide) {
+      return res.status(400).json({ error: "locationName and promptGuide are required" });
+    }
+
+    try {
+      const systemInstruction = `You are a Grand Theft Auto VI (GTA 6) intelligence informant and local Leonida lore historian.
+Your job is to provide a short, high-octane, atmospheric lore snippet or rumor about a specific spot in Vice City / Leonida.
+
+Keep the length short (2-3 sentences max).
+Make it feel cinematic, gritty, or luxurious matching the spot's vibe.
+Include a rumored incident, secret deal, easter egg, or reference to characters like Jason or Lucia.
+Respond in the requested language: ${language === 'es' ? 'Spanish' : 'English'}.
+Do NOT include any markdown code blocks, titles, or prefatory filler. Start directly with the lore.`;
+
+      const ai = getGeminiClient();
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `Location: ${locationName}. Vibe details: ${promptGuide}`,
+        config: {
+          systemInstruction,
+          temperature: 0.85,
+        }
+      });
+
+      const lore = response.text?.trim() || "No intelligence report received. Stay alert.";
+      res.json({ lore });
+    } catch (error: any) {
+      console.error("Gemini API Error in map lore:", error);
+      res.status(500).json({ error: "Failed to generate intel. Signal interference." });
+    }
+  });
+
+  // Vice City / Leonida Weather API
+  app.get("/api/weather/leonida", (req, res) => {
+    const zone = (req.query.zone as string) || "vice_city";
+    const now = new Date();
+
+    // Fluctuations for dynamic realism
+    const randTempOffset = Math.floor(Math.random() * 5) - 2; // -2 to +2
+    const randWindOffset = Math.floor(Math.random() * 4) - 2; // -2 to +2
+
+    const zonesData: Record<string, any> = {
+      vice_city: {
+        id: "vice_city",
+        name: "Vice City Metro",
+        area: "Greater Vice Area",
+        tempF: 88 + randTempOffset,
+        feelsLikeF: 94 + randTempOffset,
+        condition: "Neon Sunset Haze",
+        icon: "sun_sunset",
+        humidity: 78,
+        windMph: 12 + randWindOffset,
+        windDirection: "ESE",
+        uvIndex: 9,
+        airQuality: "Moderate (Beach Pollen)",
+        advisory: "High Heat Index - Stay Hydrated on Ocean Drive",
+        forecast: [
+          { day: "Today", condition: "Neon Sunset Haze", highF: 89, lowF: 77, icon: "sun_sunset" },
+          { day: "Thu", condition: "Tropical Sunshine", highF: 91, lowF: 79, icon: "sun" },
+          { day: "Fri", condition: "Scattered Thunderstorms", highF: 86, lowF: 75, icon: "storm" },
+          { day: "Sat", condition: "Clear Coastal Night", highF: 88, lowF: 78, icon: "moon" },
+          { day: "Sun", condition: "Humid Heatwave", highF: 93, lowF: 81, icon: "sun" }
+        ],
+        loreTip: "Perfect weather for oceanfront drag racing down Ocean Drive."
+      },
+      ocean_drive: {
+        id: "ocean_drive",
+        name: "Ocean Drive & East Beach",
+        area: "Coastal Vice City",
+        tempF: 86 + randTempOffset,
+        feelsLikeF: 92 + randTempOffset,
+        condition: "Coastal Sunshine & Sea Breeze",
+        icon: "sun",
+        humidity: 82,
+        windMph: 15 + randWindOffset,
+        windDirection: "SE",
+        uvIndex: 10,
+        airQuality: "Good",
+        advisory: "Rip Current Warning - Swim Near Guard Towers",
+        forecast: [
+          { day: "Today", condition: "Coastal Sunshine", highF: 87, lowF: 78, icon: "sun" },
+          { day: "Thu", condition: "Afternoon Squall", highF: 84, lowF: 76, icon: "rain" },
+          { day: "Fri", condition: "Breezy & Sunny", highF: 88, lowF: 77, icon: "sun" },
+          { day: "Sat", condition: "Sunset Glow", highF: 89, lowF: 79, icon: "sun_sunset" },
+          { day: "Sun", condition: "Humid Haze", highF: 91, lowF: 80, icon: "sun" }
+        ],
+        loreTip: "High UV warning! Beach crowds are packed near the Art Deco strip."
+      },
+      starfish: {
+        id: "starfish",
+        name: "Starfish Island",
+        area: "Private Estate Bay",
+        tempF: 87 + randTempOffset,
+        feelsLikeF: 93 + randTempOffset,
+        condition: "Partly Cloudy Luxury Haze",
+        icon: "cloud_sun",
+        humidity: 75,
+        windMph: 9 + randWindOffset,
+        windDirection: "E",
+        uvIndex: 8,
+        airQuality: "Excellent",
+        advisory: "Boating Caution - Shallow Sandbar Near Inlet",
+        forecast: [
+          { day: "Today", condition: "Partly Cloudy Haze", highF: 88, lowF: 77, icon: "cloud_sun" },
+          { day: "Thu", condition: "Calm Seas & Sun", highF: 90, lowF: 78, icon: "sun" },
+          { day: "Fri", condition: "Night Downpour", highF: 85, lowF: 74, icon: "rain" },
+          { day: "Sat", condition: "Sunny & Warm", highF: 89, lowF: 76, icon: "sun" },
+          { day: "Sun", condition: "Gentle Sea Breeze", highF: 88, lowF: 77, icon: "sun" }
+        ],
+        loreTip: "Yacht parties are in full swing around the private docks."
+      },
+      swamps: {
+        id: "swamps",
+        name: "Leonida Swamps",
+        area: "West Everglades Wilderness",
+        tempF: 92 + randTempOffset,
+        feelsLikeF: 104 + randTempOffset,
+        condition: "Dense Fog & High Humidity",
+        icon: "fog",
+        humidity: 95,
+        windMph: 5 + randWindOffset,
+        windDirection: "CALM",
+        uvIndex: 7,
+        airQuality: "Heavy Swamp Vapor",
+        advisory: "Flash Flood Watch & Extreme Humidity Alert",
+        forecast: [
+          { day: "Today", condition: "Dense Swamp Fog", highF: 93, lowF: 76, icon: "fog" },
+          { day: "Thu", condition: "Severe Electric Storm", highF: 84, lowF: 72, icon: "storm" },
+          { day: "Fri", condition: "Mud Bogging Rain", highF: 82, lowF: 73, icon: "rain" },
+          { day: "Sat", condition: "Humid Muggy Heat", highF: 94, lowF: 77, icon: "sun" },
+          { day: "Sun", condition: "Tropical Depression", highF: 83, lowF: 71, icon: "storm" }
+        ],
+        loreTip: "Alligator activity at peak levels. Airboat navigation recommended."
+      },
+      port_gellhorn: {
+        id: "port_gellhorn",
+        name: "Port Gellhorn",
+        area: "West Coast Industrial",
+        tempF: 85 + randTempOffset,
+        feelsLikeF: 90 + randTempOffset,
+        condition: "Overcast & Coastal Wind",
+        icon: "cloud",
+        humidity: 80,
+        windMph: 22 + randWindOffset,
+        windDirection: "WNW",
+        uvIndex: 6,
+        airQuality: "Industrial Harbor Smog",
+        advisory: "Gale Wind Warning for Small Craft in Gulf Waters",
+        forecast: [
+          { day: "Today", condition: "Overcast & Wind", highF: 86, lowF: 75, icon: "cloud" },
+          { day: "Thu", condition: "Passing Showers", highF: 83, lowF: 73, icon: "rain" },
+          { day: "Fri", condition: "Strong Gusts", highF: 84, lowF: 74, icon: "cloud" },
+          { day: "Sat", condition: "Clear Skies", highF: 88, lowF: 76, icon: "sun" },
+          { day: "Sun", condition: "Coastal Thunder", highF: 82, lowF: 72, icon: "storm" }
+        ],
+        loreTip: "Strong winds along the strip are causing drag racers to lose traction."
+      },
+      keys: {
+        id: "keys",
+        name: "Leonida Keys",
+        area: "Southern Archipelago",
+        tempF: 89 + randTempOffset,
+        feelsLikeF: 97 + randTempOffset,
+        condition: "Tropical Sunshine & Aquamarine Waters",
+        icon: "sun",
+        humidity: 79,
+        windMph: 14 + randWindOffset,
+        windDirection: "ENE",
+        uvIndex: 11,
+        airQuality: "Pristine Marine Air",
+        advisory: "Extreme UV Hazard - Sun Protection Mandatory",
+        forecast: [
+          { day: "Today", condition: "Tropical Sunshine", highF: 90, lowF: 81, icon: "sun" },
+          { day: "Thu", condition: "Clear Waters", highF: 91, lowF: 82, icon: "sun" },
+          { day: "Fri", condition: "Warm Night Breeze", highF: 89, lowF: 80, icon: "moon" },
+          { day: "Sat", condition: "Scattered Waterspouts", highF: 85, lowF: 77, icon: "storm" },
+          { day: "Sun", condition: "Sunsoaked Heaven", highF: 92, lowF: 83, icon: "sun" }
+        ],
+        loreTip: "Seven Mile Bridge offers pristine visibility for high-speed runs."
+      }
+    };
+
+    const selectedData = zonesData[zone] || zonesData["vice_city"];
+    res.json({
+      timestamp: now.toISOString(),
+      zone: selectedData
+    });
   });
 
   // Moderator Requests - Keep for now but could be moved to Firestore
